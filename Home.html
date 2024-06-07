@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Analysis: Population vs. Medical Resources Across Europe</title>
+    <link href="https://fonts.googleapis.com/css?family=Inter:300,400,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            padding: 30;
+            margin: 0px;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: #F9E0BB;
+        }
+
+        .hero {
+            height: 100vh;
+            width: 100%;
+            background-image: url('https://scienceline.org/wp-content/uploads/2020/09/Out_of_Ethiopia_shadow_WALK_clouds_text.gif');
+            background-position: center;
+            background-size: cover;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 4vw;
+            z-index: 1;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(51, 51, 51, 0.9);
+            color: #fff;
+            z-index: 1000;
+            padding: 0.5rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 10%;
+            align-items: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+
+        nav a:hover {
+            background-color: #f79327;
+            border-radius: 5px;
+        }
+
+        section {
+            padding: 2rem 0;
+            width: 95%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #fff; /* Changed to a plain white background */
+            color: black; /* Text color changed to black */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Soft box shadow for each section */
+            margin: 20px auto;
+            max-width: 12000px; /* Restricts maximum width */
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px; /* Space below headings */
+        }
+
+        p {
+            font-size: 1rem;
+            margin: 0 10px 20px; /* Space around paragraphs */
+        }
+
+        footer {
+            padding: 2%;
+         
+            color: rgb(0, 0, 0);
+            text-align: center;
+        }
+        #heading1{
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+        #heading2{
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+        li{
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="Home.html">Home</a>
+            
+            <a href="Map.html">Chart1</a>
+            <a href="sankey.html">Chart2</a>
+            <a href="Line_chart.html">Chart3</a>
+        </nav>
+    </header>
+    <div class="hero">
+        <h1>Healthcare Analysis: Population vs. Medical Resources Across Europe</h1>
+    </div>
+    <section>
+        <h2 >About This Project</h2>
+        <div>
+            <h3 id="heading1">Overview</h3>
+            <p>This project presents a comprehensive analysis of population and healthcare resources across ten European countries over the span of eight years. Designed for public health researchers and policy makers, these visualizations aim to facilitate a better understanding of healthcare capacities and needs.</p>
+            <h3 id="heading2" >Educational Benefits</h3>
+            <p>Engaging with this data through visual representations helps in identifying trends and discrepancies in healthcare resource allocation. This can empower stakeholders to make informed decisions and strategize effectively to meet public health needs.</p>
+            
+        </div>
+    </section>
+    <section>
+        <h2>Visualization</h2>
+        <div>
+            <p>The visualizations in this project serve to illuminate the complex dynamics of health determinants.</p>
+            <ul>
+                <li><strong>Time Series Analysis (Choropleth Map):</strong> Explore how the total population across Austria, France, Finland, Greece, Hungary, Netherlands, Norway, Poland, Switzerland, and the United Kingdom has changed from 2014 to 2021. Data sourced from the World Bank.</li>
+                <li><strong>Resource Allocation (Sankey Diagram):</strong> Visualize the distribution and change in medical personnel, specifically doctors, within these countries over the same period, using data from OECD Health Statistics.</li>
+                <li><strong>Comparative Growth Analysis (Line Chart):</strong> Compare the growth rates of population and medical doctors derived from our datasets. This analysis highlights the relative growth or decline in healthcare resources in comparison to population growth, emphasizing areas that may require policy adjustments.</li>
+            </ul>
+        </div>
+    </section>
+    <section>
+        <h2>Data Analysis</h2>
+        <p>Each dataset has been meticulously analyzed to present a clear, actionable insight into the healthcare dynamics of selected European countries. These insights assist in understanding the adequacy and distribution of medical resources in relation to population growth.</p>
+    </section>
+    <footer>
+        <p>Md Nahid Tanjum - 103607068  |  
+            Tan Dat Do - 103498255</p><br/>
+        
+        <p>COS30045 - Data Visualisation | Semester 1 2024 | Swinburne University of Technology</p>
+    </footer>
+</body>
+</html>

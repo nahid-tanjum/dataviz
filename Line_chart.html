@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Curved Line Charts</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F9E0BB;        }
+        header {
+            background-color: #ffffff;
+            padding: 10px 20px;
+            text-align: center;
+            width: 100%;
+            margin-left: -1px;
+            justify-content: center;
+
+        }
+        nav {
+            display: flex;
+            justify-content: left;
+            background-color: #333;
+            padding: 10px 0;
+            
+        }
+        nav a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: auto;
+            height: auto;
+            padding: 6px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+        }
+        svg {
+            width: 49.8%; /* Adjusted to fit side by side */
+            height: 600px;
+            float: left;
+            background-color: #fff;
+            border: 1px solid #000000; /* Optional, adds a border */
+            border-radius: 10px;
+           
+        }
+        select {
+            position: absolute;
+            top: 33%;
+            left: 50%; /* Central positioning */
+            transform: translateX(-50%);
+            width: 160px;
+            z-index: 10;
+            height: 100px;
+        }
+        .legend {
+            position: absolute;
+            top: 33%;
+            right: 500px;
+            width: 110px;
+            height: auto;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 12px;
+        }
+       
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Comparative Analysis of Population and Doctors' Growth Rates (2015-2021)</h1>
+    </header>
+    <nav>
+        <a href="Home.html">Home</a>
+        
+        <a href="Map.html">Chart1</a>
+        <a href="sankey.html">Chart2</a>
+        <a href="Line_chart.html">Chart3</a>
+    </nav>
+    
+    <p style="max-width: 99%; background-color: #fff; padding: 20px; border-radius: 10px;  margin-top: 20px;">
+        Explore the evolving distribution of population and doctor growth rates across Europe with this interactive line chart visualization. You can select individual or multiple countries using the dropdown menu, instantly updating both charts to reflect your choices. Hovering over any line reveals a tooltip with specific details, including the country, year, and precise growth rate. Each chart is equipped with an x-axis representing the years from 2015 to 2021 and a y-axis showing growth rates, with lines color-coded per country as indicated in the legend. Clicking on any point or line enables a focused examination of the data trends.
+    </p>
+    <p style="margin-top: 50px; position: absolute; margin-left: 340px;"> Population Growth Rate</p>
+    <p style="margin-top: 50px; position: absolute; margin-left: 1040px;"> Doctors Growth Rate</p>
+    <select id="countrySelect" multiple></select>
+    <div class="legend"></div>
+    <svg id="population"></svg>
+    <svg id="doctors"></svg>
+    <div class="tooltip"></div>
+    <!--section-->
+  <footer >
+    <p style="background-color: #fff; margin-top:630px; max-width: 98%; padding: 30px; border-radius: 10px;"><strong style="font-size: 20px;">THIS PROJECT</strong><br/>
+        <strong>Overview</strong><br/>
+        This project involves an interactive visualization that compares the growth rates of population and medical professionals in Europe from 2015 to 2021. Utilizing datasets that detail total population and total doctors, we calculated the Compound Annual Growth Rate (CAGR) for both categories using the formula 
+
+CAGR=(EV/BV) ^1/n −1, 
+where EV is the Ending Value, BV is the Beginning Value, and n is the number of years. The Excel file hosting this data underpins the creation of the visualization, enabling detailed analysis of the trends affecting healthcare workforce allocation and demographic shifts across the continent.<br/>
+<br/>
+        <strong> Educational Benefits </strong><br/>
+        This visualization serves as a powerful educational tool for students, policymakers, and healthcare professionals interested in public health and resource distribution. It offers users the ability to engage with complex data through interactive elements, such as tooltips and dynamic filtering by country and year. By exploring this visualization, users can gain a deeper understanding of the factors influencing population and doctor growth rates in Europe. This not only enhances their data literacy but also fosters a more nuanced appreciation of the challenges and opportunities in managing healthcare resources effectively in response to demographic changes.
+
+</p>
+  </footer>
+
+    <script>
+        Promise.all([
+            d3.csv("Population_growth_rate.csv"),
+            d3.csv("Doctors_growth_rate.csv")
+        ]).then(function(datasets) {
+            var dataPopulation = datasets[0];
+            var dataDoctors = datasets[1];
+
+            const years = ['2015', '2016', '2017', '2018', '2019', '2020', '2021'];
+
+            var countriesDataPopulation = dataPopulation.map(function(country) {
+                return {
+                    country: country.Country,
+                    values: years.map(function(year) {
+                        return { year: d3.timeParse("%Y")(year), value: +country[year], country: country.Country };
+                    })
+                };
+            });
+
+            var countriesDataDoctors = dataDoctors.map(function(country) {
+                return {
+                    country: country.Country,
+                    values: years.map(function(year) {
+                        return { year: d3.timeParse("%Y")(year), value: +country[year], country: country.Country };
+                    })
+                };
+            });
+
+            var margin = {top: 50, right: 50, bottom: 50, left: 50},
+                width = document.body.clientWidth / 2 - margin.left - margin.right,
+                height = 600 - margin.top - margin.bottom;
+
+            var x = d3.scaleTime()
+                .domain([d3.min(years, d => d3.timeParse("%Y")(d)), d3.max(years, d => d3.timeParse("%Y")(d))])
+                .range([0, width]);
+
+            var yPopulation = d3.scaleLinear()
+                .domain(d3.extent(countriesDataPopulation.flatMap(c => c.values), d => d.value))
+                .range([height, 0]);
+
+            var yDoctors = d3.scaleLinear()
+                .domain(d3.extent(countriesDataDoctors.flatMap(c => c.values), d => d.value))
+                .range([height, 0]);
+
+            var svgPopulation = d3.select("#population").append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            var svgDoctors = d3.select("#doctors").append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svgPopulation.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+            svgPopulation.append("g")
+                .call(d3.axisLeft(yPopulation));
+
+            svgDoctors.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+            svgDoctors.append("g")
+                .call(d3.axisLeft(yDoctors));
+
+            var color = d3.scaleOrdinal(d3.schemeCategory10);
+            var line = d3.line()
+                .curve(d3.curveMonotoneX)
+                .x(d => x(d.year))
+                .y(d => yPopulation(d.value));
+
+            var tooltip = d3.select(".tooltip");
+
+            function updateLineChart(svg, data, yScale) {
+                var update = svg.selectAll(".countryGroup").data(data, d => d.country);
+                var enter = update.enter().append("g")
+                    .attr("class", "countryGroup");
+
+                enter.merge(update)
+                    .each(function(d) {
+                        var group = d3.select(this);
+                        group.append("path")
+                            .datum(d.values)
+                            .attr("class", "line")
+                            .attr("d", line.y(d => yScale(d.value)))
+                            .attr("fill", "none")
+                            .attr("stroke", () => color(d.country))
+                            .attr("stroke-width", 2);
+
+                        group.selectAll("circle")
+                            .data(d.values)
+                            .enter().append("circle")
+                            .attr("cx", d => x(d.year))
+                            .attr("cy", d => yScale(d.value))
+                            .attr("r", 3)
+                            .attr("fill", color(d.country))
+                            .on("mouseover", function(event, d) {
+                                tooltip.transition().duration(200).style("opacity", .9);
+                                tooltip.html(`Country: ${d.country}<br/>Year: ${d3.timeFormat("%Y")(d.year)}<br/>Value: ${d.value}`)
+                                    .style("left", (event.pageX + 5) + "px")
+                                    .style("top", (event.pageY - 28) + "px");
+                            })
+                            .on("mouseout", function(d) {
+                                tooltip.transition().duration(500).style("opacity", 0);
+                            });
+                    });
+
+                update.exit().remove();
+            }
+            
+
+            var select = d3.select("#countrySelect")
+                .on("change", function() {
+                    var selectedOptions = Array.from(this.selectedOptions, option => option.value);
+                    updateChart(selectedOptions);
+                });
+
+            select.append("option")
+                .attr("value", "All")
+                .text("All Countries");
+
+            countriesDataPopulation.forEach(function(d) {
+                select.append("option")
+                    .attr("value", d.country)
+                    .text(d.country);
+            });
+
+            var legend = d3.select(".legend");
+            legend.selectAll("div")
+                .data(countriesDataPopulation)
+                .enter()
+                .append("div")
+                .style("color", d => color(d.country))
+                .text(d => d.country);
+
+            function updateChart(selectedCountries) {
+                var filteredPopulationData = selectedCountries.includes("All") ? countriesDataPopulation : countriesDataPopulation.filter(d => selectedCountries.includes(d.country));
+                var filteredDoctorsData = selectedCountries.includes("All") ? countriesDataDoctors : countriesDataDoctors.filter(d => selectedCountries.includes(d.country));
+
+                updateLineChart(svgPopulation, filteredPopulationData, yPopulation);
+                updateLineChart(svgDoctors, filteredDoctorsData, yDoctors);
+            }
+
+            updateChart(["All"]);  // Initially show all countries
+        });
+    </script>
+</body>
+</html>

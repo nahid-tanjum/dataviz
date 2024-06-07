@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geographical Visualization</title>
+    <!-- Ensure all scripts are loaded over HTTPS to avoid mixed content issues -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F9E0BB;
+        }
+        
+
+        header {
+            background-color: #fff;
+            color: black;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+
+        header h1 {
+            display: inline;
+            font-size: 1.8em;
+            margin: 0 20px;
+            vertical-align: middle;
+        }
+
+        nav {
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        nav a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        section {
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        #about, #instructions {
+            background-color: #ffffff;
+        }
+
+        section h2, section h3 {
+            margin-top: 0;
+            font-size: 1.8em;
+            padding-bottom: 10px;
+        }
+
+        section p, section ul {
+            font-size: 1.1em;
+            line-height: 1.6em;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 10px 0;
+        }
+
+        .content {
+            max-width: 97.8%;
+            margin: auto;
+            background-color: white;
+            border-radius: 10px;
+           
+        }
+        footer {
+            padding: 2%;
+         
+            color: rgb(0, 0, 0);
+            text-align: center;
+        }
+
+        /* Tooltip styling */
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: 120px;
+            height: 40px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        button.active{
+            background-color: #4CAF50;
+            color: white;
+          
+        }
+        @media (max-width: 768px) {
+         header h1 {
+         font-size: 1.2em; /* Smaller text for the header on small screens */
+         }
+ 
+        nav a {
+        padding: 10px 8px; /* Smaller padding */
+        font-size: 0.9em; /* Smaller text for navigation links */
+        }
+
+    section {
+        padding: 15px; /* Smaller padding within sections */
+    }
+
+    .content, section {
+        margin: 10px; /* Less margin for better use of space */
+    }
+
+    button {
+        padding: 5px 10px; /* Smaller buttons */
+        font-size: 0.8em;
+    }
+}
+
+
+     
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://claridenglobal.com/conference/digitalcampus2017/wp-content/uploads/sites/153/2017/03/Swinburne-logo_landscape-colour_large.jpg" alt="Swinburne Logo">
+        <h1>European Demographics Mobility (2014-2021)</h1>
+    </header>
+    <nav>
+        <a href="Home.html">Home</a>
+        
+        <a href="Map.html">Chart1</a>
+        <a href="sankey.html">Chart2</a>
+        <a href="Line_chart.html">Chart3</a>
+    </nav>
+    <section id="instructions">
+        
+        <p>This interactive map visualizes population data across Europe. Use the buttons below the map to select different years and observe changes in population data represented by varying shades of blue. The darker the shade, the higher the population.</p>
+        <ul>
+            <li><strong>Hover</strong> over any country to see the specific population data for the year selected.</li>
+            <li><strong>Click</strong> on the year buttons to update the map with data from different years.</li>
+        </ul>
+    </section>
+    <div class="content">
+        <!-- Create an element where the map will take place -->
+        <svg id="my_dataviz" width="1600" height="700"></svg>
+
+        <!-- Buttons to change the year -->
+        <div style ="padding: 30px; margin-left: 620px;">
+            <button id="2014" onclick="updateMap('2014')">2014</button>
+            <button id="2015" onclick="updateMap('2015')">2015</button>
+            <button id="2016" onclick="updateMap('2016')">2016</button>
+            <button id="2017" onclick="updateMap('2017')">2017</button>
+            <button id="2018" onclick="updateMap('2018')">2018</button>
+            <button id="2019" onclick="updateMap('2019')">2019</button>
+            <button id="2020" onclick="updateMap('2020')">2020</button>
+            <button id="2021" onclick="updateMap('2021')">2021</button>
+        </div>
+    </div>
+    <section id="home">
+        <h2>ABOUT THIS PROJECT</h2>
+        <div class="overview">
+            <h3>Overview</h3>
+            <p>This project is designed specifically for university students pursuing degrees in public health. It aims to provide a comprehensive visualization of non-medical determinants of health across Europe, highlighting how demographic trends impact public health outcomes. The interactive map allows students to explore population data dynamically, offering insights into how population density and distribution can influence health resources and services.</p>
+        </div>
+        <div class="benefits">
+            <h3>Educational Benefits</h3>
+            <p>By engaging with these visualizations, students can enhance their educational experience by directly interacting with demographic data. This practical approach helps in understanding complex concepts such as health workforce migration, distribution of medical resources, and the broader impacts of demographic changes on public health. It encourages critical thinking and analysis, making it a valuable educational tool in the public health curriculum.</p>
+        </div>
+    </section>
+    <footer>
+        <p>Md Nahid Tanjum - 103607068  |  
+            Tan Dat Do - 103498255</p><br/>
+        
+        <p>COS30045 - Data Visualisation | Semester 1 2024 | Swinburne University of Technology</p>
+    </footer>
+
+    <!-- Create a tooltip div that is hidden by default -->
+   
+    <div id="tooltip" class="tooltip"></div>
+
+    <!-- JavaScript remains the same, embedded in the HTML for this example -->
+    <script>
+        // The svg
+        var svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        // Map and projection
+        var projection = d3.geoMercator()
+            .scale(400) // Adjusted scale for Europe
+            .center([15, 50]) // Adjusted center for Europe
+            .translate([width / 2, height / 2]);
+        var path = d3.geoPath().projection(projection);
+
+        // Data and color scale
+        var data = d3.map();
+        var colorScale = d3.scaleThreshold()
+            .domain([1000000, 10000000, 50000000, 60000000, 85000000, 200000000])
+            .range(d3.schemeBlues[6]);
+
+        // Load external data and boot
+        d3.queue()
+            .defer(d3.json, "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/TopoJSON/europe.topojson")
+            .defer(d3.csv, "Total_Number_population_new.csv", function(d) {
+                data.set(d.NAME, +d["2014"]); // Load initial data for 2014
+            })
+            .await(ready);
+
+            var svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        var projection = d3.geoMercator()
+            .scale(400) // Adjust scale for Europe
+            .center([15, 50]) // Center the map over Europe
+            .translate([width / 2, height / 2]);
+
+        var path = d3.geoPath().projection(projection);
+
+        var data = d3.map();
+        var colorScale = d3.scaleThreshold()
+            .domain([1000000, 10000000, 50000000, 60000000, 85000000, 200000000])
+            .range(d3.schemeBlues[7]);
+
+        // Initialize tooltip
+        var tooltip = d3.select("#tooltip");
+
+        // Load external data
+        d3.queue()
+            .defer(d3.json, "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/TopoJSON/europe.topojson")
+            .defer(d3.csv, "Total_Number_population_new.csv", function(d) { data.set(d.NAME, +d["2014"]); })
+            .await(ready);
+
+        function ready(error, europe) {
+            if (error) throw error;
+
+            var countries = topojson.feature(europe, europe.objects.europe).features;
+
+            svg.append("g")
+                .selectAll("path")
+                .data(countries)
+                .enter().append("path")
+                .attr("fill", function(d) { return colorScale(data.get(d.properties.NAME) || 0); })
+                .attr("d", path)
+                .attr("class", "Country")
+                .style("stroke", "white")
+                .style("opacity", 0.8)
+                .on("mouseover", function(d) {
+                    tooltip.style("opacity", 1);
+                    tooltip.html(d.properties.NAME + "<br>" + "Population: " + (data.get(d.properties.NAME) || "N/A"))
+                        .style("left", (d3.event.pageX + 10) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function() {
+                    tooltip.style("opacity", 0);
+                });
+        }
+
+        function updateMap(year) {
+    // Remove 'active' class from all buttons
+    document.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Add 'active' class to the clicked button
+    document.getElementById(year).classList.add('active');
+
+    // Load new data
+    d3.csv("Total_Number_population_new.csv", function(error, dataArray) {
+        if (error) {
+            console.error("Error loading the data: ", error);
+            return; // Exit the function if there's an error
+        }
+
+        console.log("Data array for year " + year + ":", dataArray); // Log the entire data array
+
+        var updatedData = d3.map();
+        dataArray.forEach(function(d) {
+            updatedData.set(d.NAME, +d[year]); // Parse and set the new data
+        });
+
+        console.log("Updated data map for year " + year + ":", updatedData); // Log the updated data map
+
+        // Update the map with new data
+        svg.selectAll("path")
+            .transition()
+            .duration(750)
+            .attr("fill", function(d) {
+                var value = updatedData.get(d.properties.NAME);
+                return value ? colorScale(value) : "#ccc"; // Apply color scale
+            });
+
+        // Update tooltip data
+        svg.selectAll("path").on("mouseover", function(d) {
+            tooltip.transition().duration(200).style("opacity", 0.9);
+            tooltip.html(d.properties.NAME + "<br>" + "Population: " + (updatedData.get(d.properties.NAME) || "N/A"))
+                .style("left", (d3.event.pageX + 10) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        });
+    });
+}
+
+
+
+// Define the color scale
+var colorScale = d3.scaleThreshold()
+    .domain([1000000, 10000000, 50000000, 60000000, 85000000, 200000000])
+    .range(d3.schemeBlues[7]);
+
+// Set the right margin width you want for the legend
+var rightMargin = 390;
+
+// Legend setup
+var legendWidth = 150; // Set the width of the legend for further right movement
+var legend = svg.append("g")
+  .attr("class", "legend")
+  .attr("transform", "translate(" + (width - legendWidth - rightMargin) + ",50)"); // Move legend to the right by adjusting here
+
+// Legend data based on the colorScale
+var legendData = colorScale.range().map(function(d) {
+    d = colorScale.invertExtent(d);
+    if (d[0] == null) d[0] = colorScale.domain()[0];
+    if (d[1] == null) d[1] = colorScale.domain()[colorScale.domain().length - 1];
+    return d;
+});
+
+// Create one rect and text for each range
+legend.selectAll("rect")
+  .data(legendData)
+  .enter().append("rect")
+    .attr("height", 20)
+    .attr("x", 0)
+    .attr("y", function(d, i) { return i * 25; })
+    .attr("width", 20)
+    .style("fill", function(d) { return colorScale(d[0]); });
+
+// Add text labels
+legend.selectAll("text")
+  .data(legendData)
+  .enter().append("text")
+    .attr("x", 30) // Text offset from the rectangles
+    .attr("y", function(d, i) { return i * 25 + 15; }) // Align text with rectangles
+    .text(function(d) { return `${d[0].toLocaleString()} - ${d[1].toLocaleString()}`; });
+
+    
+    </script>
+</body>
+</html>

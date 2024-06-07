@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sankey Diagram</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://unpkg.com/d3-sankey"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F9E0BB;
+        }
+
+        header {
+            background-color: #fff;
+            color: black;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+
+        header h1 {
+            display: inline;
+            font-size: 1.8em;
+            margin: 0 20px;
+            vertical-align: middle;
+        }
+
+        nav {
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        nav a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        section {
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #about {
+            background-color: #e0f7fa;
+        }
+
+
+        section h2 {
+            margin-top: 0;
+            font-size: 1.8em;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        section h3 {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        section p, section ul {
+            font-size: 1.1em;
+            line-height: 1.6em;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 10px 0;
+        }
+
+        .content {
+           
+            margin: auto;
+            background-color: #ffffff;
+            max-width: 96%;
+            border-radius: 10px;
+        }
+
+        /* Tooltip styling */
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: 120px;
+            height: 40px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+        }
+        svg {
+            display: block;
+            margin: auto;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+        }
+        .node rect {
+            cursor: pointer;
+            stroke-width: 2px;
+        }
+        .link {
+            stroke: #000;
+            stroke-opacity: 0.2;
+        }
+        .link:hover {
+            stroke-opacity: 0.7; /* Deepen color on hover */
+            cursor: pointer;
+        }
+        #sankey_tooltip {
+            position: absolute;
+            text-align: center;
+            width: auto;
+            padding: 10px;
+            font-size: 14px;
+            background: white;
+            border: 1px solid #d3d3d3;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            color: black;
+          
+        }
+    
+
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://claridenglobal.com/conference/digitalcampus2017/wp-content/uploads/sites/153/2017/03/Swinburne-logo_landscape-colour_large.jpg" alt="Swinburne Logo">
+        <h1>"Distribution of Medical Workforce in Europe by Country (2014-2021)</h1>
+    </header>
+    <nav style="margin-bottom: 20px;">
+        <a href="Home.html">Home</a>
+        
+        <a href="Map.html">Chart1</a>
+        <a href="sankey.html">Chart2</a>
+        <a href="Line_chart.html">Chart3</a>
+    </nav>
+    
+    <p style="max-width: 93%; background-color: #fff; padding: 20px; border-radius: 10px; justify-content: center; margin-left: 28px;">Explore the dynamic landscape of medical professionals across Europe using this interactive Sankey diagram. This visualization allows you to <strong>hover over </strong> any link to see detailed data about the flow of doctors between countries and across different years, including the source country, target year, and total number of doctors. <strong>Click </strong> on any node—representing either a country or a year—to highlight and isolate the connections to it, enhancing your focus on specific data streams. The width of the links corresponds to the volume of doctors, offering a visual representation of their distribution. This tool combines clarity and detailed data access to facilitate both educational and analytical pursuits in understanding trends in medical workforce allocation across Europe.</p>
+    <div id="sankey"></div>
+    <div id="sankey_tooltip"></div>
+    <div class="content">
+        <section id="home">
+            <h2>ABOUT THIS PROJECT</h2>
+            <div class="overview">
+                <h3>Overview</h3>
+                <p>This project, featuring an interactive Sankey diagram, is crafted specifically for university students pursuing degrees in public health. Utilizing data from the OECD Health Statistics on health workforce migration, the visualization tracks the distribution and flow of doctors across ten European countries from 2014 to 2021. This project aims to illustrate the dynamics of medical professional migration within Europe, providing a visual and analytical understanding of trends over the given period.</p>
+            </div>
+            <div class="benefits">
+                <h3>Educational Benefits</h3>
+                <p>Engaging with this Sankey diagram offers students a unique opportunity to visually explore complex data relationships and migration patterns of healthcare professionals. By analyzing these visualizations, students can enhance their educational experience, gaining insights into the factors influencing health workforce dynamics and the implications of these movements on public health. This interactive tool not only aids in the comprehension of statistical data but also encourages critical thinking about the broader impacts of healthcare professional distribution across Europe.</p>
+            </div>
+        </section>
+
+        </section>
+        
+    </div>
+    
+    <script>
+        function sankey() {
+            var w = 1450;
+            var h = 800;
+            var padding = 30;
+            
+            const schemeCategory10 = d3.schemeTableau10;
+            const schemeTableau10 = d3.schemeAccent;
+
+            const combinedColors = schemeCategory10.concat(schemeTableau10);
+            var color = d3
+                .scaleOrdinal(d3.schemeTableau10)
+                .domain(d3.range(combinedColors.length))
+                .range(combinedColors);
+
+            var svg = d3
+                .select("#sankey")
+                .append("svg")
+                .attr("width", w)
+                .attr("height", h)
+                .attr("style", "border: 1px solid;");
+
+            var g = svg
+                .append("g")
+                .attr("transform", `translate(${padding},${padding})`);
+
+            
+
+            var sankey = d3.sankey()
+                .nodeWidth(36)
+                .nodePadding(40)
+                .size([w - padding * 2, h - padding * 2]);
+
+            d3.json("sankeyn.json").then((data) => {
+                var graph = sankey(data);
+
+                var links = g.append("g")
+                    .attr("fill", "none")
+                    .selectAll("path")
+                    .data(graph.links)
+                    .enter()
+                    .append("path")
+                    .attr("class", "link")
+                    .attr("d", d3.sankeyLinkHorizontal())
+                    .attr("stroke-width", (d) => Math.max(1, d.width * 1.5))
+                    .style("stroke", function(d, i) {
+                        const gradientId = `gradient-${i}`;
+                        const linearGradient = svg.append("defs")
+                            .append("linearGradient")
+                            .attr("id", gradientId)
+                            .attr("gradientUnits", "userSpaceOnUse")
+                            .attr("x1", d.source.x1)
+                            .attr("x2", d.target.x0);
+
+                        linearGradient.append("stop")
+                            .attr("offset", "0%")
+                            .attr("stop-color", color(d.source.name));
+
+                        linearGradient.append("stop")
+                            .attr("offset", "100%")
+                            .attr("stop-color", color(d.target.name));
+
+                        return `url(#${gradientId})`;
+                    })
+                    .on("mouseover", function (event, d) {
+                        d3.select(this)
+                          .raise() // Bring to front
+                          .transition()
+                          .duration(150)
+                          .style('stroke-opacity', 0.7); // Deepen the color
+                        
+                        d3.select("#sankey_tooltip")
+                          .style("opacity", 1)
+                          .html(`Country: ${d.source.name}<br>Year: ${d.target.name}<br>Total number doctor: ${d.value}`)
+                          .style("left", (event.pageX + 10) + "px")
+                          .style("top", (event.pageY + 10) + "px");
+                    })
+                    .on("mouseleave", function () {
+                        d3.select(this)
+                          .transition()
+                          .duration(150)
+                          .style('stroke-opacity', 0.2); // Reset the opacity
+                        
+                        d3.select("#sankey_tooltip").style("opacity", 0);
+                    });
+
+                var nodes = g.append("g")
+                    .selectAll(".node")
+                    .data(graph.nodes)
+                    .enter()
+                    .append("g")
+                    .attr("class", "node")
+                    .on("click", function(event, node) {
+                        links.style('stroke-opacity', 0.1); // Dim all links
+                        links.filter(l => l.source === node || l.target === node)
+                            .style('stroke-opacity', 0.7); // Highlight connected links
+                    });
+
+                nodes.append("rect")
+                    .attr("x", (node) => node.x0)
+                    .attr("y", (node) => node.y0)
+                    .attr("height", (node) => node.y1 - node.y0)
+                    .attr("width", sankey.nodeWidth())
+                    .style("fill", (node) => (node.color = color(node.name)))
+                    .attr("stroke", "#000");
+
+                nodes.append("text")
+                    .attr("x", (node) => node.x0 - 6)
+                    .attr("y", (node) => (node.y1 + node.y0) / 2)
+                    .attr("dy", "0.35em")
+                    .attr("text-anchor", "end")
+                    .text((node) => node.name)
+                    .filter((node) => node.x0 < w / 2)
+                    .attr("x", (node) => node.x1 + 6)
+                    .attr("text-anchor", "start");
+            });
+        }
+
+        sankey();
+    </script>
+</body>
+</html>
